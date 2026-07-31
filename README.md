@@ -7,7 +7,9 @@ mp3 notes.txt
 ```
 
 That's it — it creates `notes.mp3` in the same folder, using Google
-Cloud Text-to-Speech.
+Cloud Text-to-Speech. Long text is split into chunks automatically
+(Google's API caps each request at 5,000 bytes) and stitched back
+into one MP3.
 
 ## Setup
 

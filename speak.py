@@ -5,14 +5,85 @@ from __future__ import annotations
 
 import argparse
 import os
+import re
 import sys
 
 from google.cloud import texttospeech
+
+# Google Cloud TTS's synchronous API hard-limits input to 5,000 UTF-8 bytes
+# per request. Chunk a bit under that so boundary edge cases never trip it.
+MAX_CHUNK_BYTES = 4800
+
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.!?])\s+")
 
 
 def _read_file(path: str) -> str:
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
+
+
+def _split_long_segment(segment: str, max_bytes: int) -> list[str]:
+    """Hard-split a segment with no sentence breaks (e.g. one huge run-on
+    sentence) on whitespace, as a last resort."""
+    pieces = []
+    current = ""
+    for word in segment.split(" "):
+        candidate = f"{current} {word}".strip() if current else word
+        if len(candidate.encode("utf-8")) <= max_bytes:
+            current = candidate
+            continue
+        if current:
+            pieces.append(current)
+            current = ""
+        if len(word.encode("utf-8")) <= max_bytes:
+            current = word
+            continue
+        # A single "word" is itself too large (e.g. no spaces at all) - cut by raw bytes.
+        encoded = word.encode("utf-8")
+        for i in range(0, len(encoded), max_bytes):
+            pieces.append(encoded[i : i + max_bytes].decode("utf-8", errors="ignore"))
+    if current:
+        pieces.append(current)
+    return pieces
+
+
+def split_into_chunks(text: str, max_bytes: int = MAX_CHUNK_BYTES) -> list[str]:
+    """Split text into pieces that each fit within max_bytes of UTF-8, preferring
+    paragraph and sentence boundaries over mid-word cuts, and packing multiple
+    sentences per chunk to keep the number of API calls (and audio seams) low."""
+    if len(text.encode("utf-8")) <= max_bytes:
+        return [text]
+
+    segments = []
+    for paragraph in re.split(r"\n\s*\n", text):
+        paragraph = paragraph.strip()
+        if not paragraph:
+            continue
+        if len(paragraph.encode("utf-8")) <= max_bytes:
+            segments.append(paragraph)
+            continue
+        for sentence in _SENTENCE_SPLIT_RE.split(paragraph):
+            sentence = sentence.strip()
+            if not sentence:
+                continue
+            if len(sentence.encode("utf-8")) <= max_bytes:
+                segments.append(sentence)
+            else:
+                segments.extend(_split_long_segment(sentence, max_bytes))
+
+    chunks = []
+    current = ""
+    for segment in segments:
+        candidate = f"{current} {segment}".strip() if current else segment
+        if len(candidate.encode("utf-8")) <= max_bytes:
+            current = candidate
+        else:
+            if current:
+                chunks.append(current)
+            current = segment
+    if current:
+        chunks.append(current)
+    return chunks
 
 
 def get_text(args: argparse.Namespace) -> tuple[str, str | None]:
@@ -68,7 +139,6 @@ def main() -> None:
     language_code = args.language or "-".join(args.voice.split("-")[:2])
 
     client = texttospeech.TextToSpeechClient()
-    synthesis_input = texttospeech.SynthesisInput(text=text)
     voice = texttospeech.VoiceSelectionParams(language_code=language_code, name=args.voice)
     audio_config = texttospeech.AudioConfig(
         audio_encoding=texttospeech.AudioEncoding.MP3,
@@ -76,10 +146,19 @@ def main() -> None:
         pitch=args.pitch,
     )
 
-    response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+    chunks = split_into_chunks(text)
+
+    audio_parts = []
+    for i, chunk in enumerate(chunks, start=1):
+        if len(chunks) > 1:
+            print(f"Synthesizing chunk {i}/{len(chunks)}...")
+        synthesis_input = texttospeech.SynthesisInput(text=chunk)
+        response = client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
+        audio_parts.append(response.audio_content)
 
     with open(output, "wb") as f:
-        f.write(response.audio_content)
+        for part in audio_parts:
+            f.write(part)
 
     print(f"Saved: {output}")
 
