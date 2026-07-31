@@ -11,6 +11,8 @@ Cloud Text-to-Speech. Long text is split into chunks automatically
 (Google's API caps each request at 5,000 bytes) and stitched back
 into one MP3.
 
+Try it on a bundled sample: `mp3 samples/octopus-intelligence.txt`
+
 ## Setup
 
 1. [Create a Google Cloud project](https://console.cloud.google.com/projectcreate) (needs [billing enabled](https://console.cloud.google.com/billing))
