@@ -25,7 +25,7 @@ def main() -> None:
     parser.add_argument("text", nargs="*", help="Text to speak. If omitted, reads from --file, stdin, or a prompt.")
     parser.add_argument("-o", "--output", default="output.mp3", help="Output MP3 file path (default: output.mp3)")
     parser.add_argument("-f", "--file", help="Read text from a file instead of the command line")
-    parser.add_argument("--voice", default="en-US-Standard-C", help="Google TTS voice name (default: en-US-Standard-C)")
+    parser.add_argument("--voice", default="en-US-Standard-D", help="Google TTS voice name (default: en-US-Standard-D)")
     parser.add_argument("--language", default=None, help="Language code, e.g. en-US (default: derived from --voice)")
     parser.add_argument("--rate", type=float, default=1.0, help="Speaking rate, 0.25-4.0 (default: 1.0)")
     parser.add_argument("--pitch", type=float, default=0.0, help="Pitch, -20.0 to 20.0 semitones (default: 0.0)")
