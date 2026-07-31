@@ -11,28 +11,20 @@ Cloud Text-to-Speech.
 
 ## Setup
 
-1. Create and activate a virtual environment:
-
+1. [Create a Google Cloud project](https://console.cloud.google.com/projectcreate) (needs [billing enabled](https://console.cloud.google.com/billing))
+2. [Enable the Text-to-Speech API](https://console.cloud.google.com/apis/library/texttospeech.googleapis.com) for it
+3. [Create a service account](https://console.cloud.google.com/iam-admin/serviceaccounts) → **Keys** → **Add key** → **JSON**, and download it
+4. Install:
    ```
    python -m venv venv
    venv\Scripts\activate
-   ```
-
-2. Install the tool into it:
-
-   ```
    pip install -e .
    ```
-
-3. Get a Google Cloud service account key (IAM & Admin > Service
-   Accounts > Keys) for a project with the Text-to-Speech API enabled,
-   and point the tool at it:
-
+5. Point at your key:
    ```
-   set GOOGLE_APPLICATION_CREDENTIALS=path\to\your-key.json
+   set GOOGLE_APPLICATION_CREDENTIALS=path\to\key.json
    ```
-
-   (or pass `--creds path\to\your-key.json` on each run instead).
+   (or pass `--creds path\to\key.json` on each run instead)
 
 ## Options
 
