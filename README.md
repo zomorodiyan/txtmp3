@@ -1,13 +1,13 @@
 # mp3
 
-A command-line tool that converts text to speech using Google Cloud
-Text-to-Speech and saves the result as an MP3 file.
+Turn a text file into speech with one command:
 
-## Requirements
+```
+mp3 notes.txt
+```
 
-- Python 3.8+
-- A Google Cloud project with the Text-to-Speech API enabled
-- A service account JSON key with access to that API
+That's it — it creates `notes.mp3` in the same folder, using Google
+Cloud Text-to-Speech. Everything else below is optional extras.
 
 ## Setup
 
@@ -18,67 +18,71 @@ Text-to-Speech and saves the result as an MP3 file.
    venv\Scripts\activate
    ```
 
-2. Install dependencies:
+2. Install the tool into it:
 
    ```
-   pip install -r requirements.txt
+   pip install -e .
    ```
 
-3. Get a service account key from Google Cloud (IAM & Admin > Service
-   Accounts > Keys), and point the app at it either by setting an
-   environment variable:
+   This makes the `mp3` command available anywhere the environment is
+   activated.
+
+3. Get a Google Cloud service account key (IAM & Admin > Service
+   Accounts > Keys) for a project with the Text-to-Speech API enabled,
+   and point the tool at it:
 
    ```
    set GOOGLE_APPLICATION_CREDENTIALS=path\to\your-key.json
    ```
 
-   or by passing `--creds` on each run (see below).
+   (or pass `--creds path\to\your-key.json` on each run instead).
 
-## Usage
-
-Speak text given directly on the command line:
+Now, whenever this environment is activated:
 
 ```
-python speak.py "Hello, world!"
+mp3 notes.txt
 ```
 
-Read text from a file:
+## Bonus features
+
+Speak text given directly on the command line instead of a file:
 
 ```
-python speak.py -f input.txt
+mp3 "Hello, world!"
 ```
 
 Read text from stdin:
 
 ```
-echo "Hello, world!" | python speak.py
+echo "Hello, world!" | mp3
 ```
 
-By default the audio is saved to `output.mp3`. Use `-o` to change that:
+Choose a different output path (default: same name as the input file,
+or `output.mp3` for direct/stdin text):
 
 ```
-python speak.py "Hello, world!" -o greeting.mp3
+mp3 notes.txt -o greeting.mp3
 ```
 
 Play the audio immediately after saving:
 
 ```
-python speak.py "Hello, world!" --play
+mp3 notes.txt --play
 ```
 
 Use a specific credentials file for a single run instead of the
 environment variable:
 
 ```
-python speak.py "Hello, world!" --creds path\to\your-key.json
+mp3 notes.txt --creds path\to\your-key.json
 ```
 
 ### Options
 
 | Flag             | Description                                                        |
 | ---------------- | -------------------------------------------------------------------|
-| `text`            | Text to speak (omit to read from `--file`, stdin, or a prompt)     |
-| `-o, --output`     | Output MP3 file path (default: `output.mp3`)                       |
+| `text`            | Text to speak, or a path to a text file (omit to read from `--file`, stdin, or a prompt) |
+| `-o, --output`     | Output MP3 file path (default: same name as the input file, otherwise `output.mp3`) |
 | `-f, --file`       | Read text from a file instead of the command line                  |
 | `--voice`          | Google TTS voice name (default: `en-US-Standard-D`)                |
 | `--language`       | Language code, e.g. `en-US` (default: derived from `--voice`)       |

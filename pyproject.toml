@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "txtmp3"
+version = "0.1.0"
+description = "CLI for Google Cloud Text-to-Speech: give it text, get an MP3."
+requires-python = ">=3.8"
+dependencies = ["google-cloud-texttospeech"]
+
+[project.scripts]
+mp3 = "speak:main"
+
+[tool.setuptools]
+py-modules = ["speak"]
