@@ -7,7 +7,7 @@ mp3 notes.txt
 ```
 
 That's it — it creates `notes.mp3` in the same folder, using Google
-Cloud Text-to-Speech. Everything else below is optional extras.
+Cloud Text-to-Speech.
 
 ## Setup
 
@@ -24,9 +24,6 @@ Cloud Text-to-Speech. Everything else below is optional extras.
    pip install -e .
    ```
 
-   This makes the `mp3` command available anywhere the environment is
-   activated.
-
 3. Get a Google Cloud service account key (IAM & Admin > Service
    Accounts > Keys) for a project with the Text-to-Speech API enabled,
    and point the tool at it:
@@ -37,47 +34,15 @@ Cloud Text-to-Speech. Everything else below is optional extras.
 
    (or pass `--creds path\to\your-key.json` on each run instead).
 
-Now, whenever this environment is activated:
+## Options
 
 ```
-mp3 notes.txt
+mp3 "Hello, world!"                  # speak literal text instead of a file
+echo "Hello, world!" | mp3           # read text from stdin
+mp3 notes.txt -o greeting.mp3        # choose the output path
+mp3 notes.txt --play                 # play the audio after saving
+mp3 notes.txt --creds key.json       # use a specific credentials file
 ```
-
-## Bonus features
-
-Speak text given directly on the command line instead of a file:
-
-```
-mp3 "Hello, world!"
-```
-
-Read text from stdin:
-
-```
-echo "Hello, world!" | mp3
-```
-
-Choose a different output path (default: same name as the input file,
-or `output.mp3` for direct/stdin text):
-
-```
-mp3 notes.txt -o greeting.mp3
-```
-
-Play the audio immediately after saving:
-
-```
-mp3 notes.txt --play
-```
-
-Use a specific credentials file for a single run instead of the
-environment variable:
-
-```
-mp3 notes.txt --creds path\to\your-key.json
-```
-
-### Options
 
 | Flag             | Description                                                        |
 | ---------------- | -------------------------------------------------------------------|
